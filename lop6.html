@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò chơi: Cùng Dế Mèn học bài học đường đời! (Nâng cấp AI)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            overflow: hidden;
+        }
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transition: opacity 0.7s ease-in-out, transform 0.7s ease-in-out;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        .main-bg {
+            background-color: #003366; /* Xanh dương đậm */
+        }
+        .accent-bg {
+            background-color: #FFD700; /* Vàng tươi */
+        }
+        .main-text {
+            color: #FFD700;
+        }
+        .accent-text {
+            color: #003366;
+        }
+        .btn-option {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        .character-img {
+            max-height: 250px;
+            width: auto;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            object-fit: contain;
+        }
+        .tts-icon {
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            fill: #FFD700;
+            transition: transform 0.2s;
+        }
+        .tts-icon:hover {
+            transform: scale(1.1);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FFD700;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 640px) {
+            .character-img {
+                max-height: 150px;
+            }
+            h1 {
+                font-size: 1.8rem !important;
+            }
+            h2 {
+                font-size: 1.25rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="main-bg">
+
+    <!-- Slide 1: Giới thiệu -->
+    <div id="slide-1" class="slide active">
+        <div class="bg-white/10 p-8 rounded-2xl shadow-2xl max-w-3xl w-full relative">
+            <h1 class="text-4xl md:text-5xl font-bold main-text mb-4">Cùng Dế Mèn học bài học đường đời!</h1>
+            <p class="text-white text-lg md:text-xl mb-6">Chào mừng các bạn đến với trò chơi! Hãy đọc kỹ câu hỏi, chọn đáp án đúng và khám phá các tính năng AI mới nhé.</p>
+            <img src="https://i.imgur.com/gZq3h8c.png" alt="Dế Mèn vui vẻ chào mừng" class="character-img mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/300x250/003366/FFD700?text=D%E1%BA%BF+M%C3%A8n';">
+            <button onclick="showSlide(2)" class="accent-bg accent-text font-bold py-3 px-8 rounded-full text-xl btn-option">Bắt đầu</button>
+        </div>
+    </div>
+
+    <!-- Các slide câu hỏi (2 đến 6) -->
+    <div id="slide-2" class="slide question-slide" data-question="Dế Mèn có ngoại hình được miêu tả như thế nào ở đầu truyện?" data-correct="B. Cường tráng, khỏe mạnh với đôi càng mẫm bóng">
+        <div class="bg-white/10 p-8 rounded-2xl shadow-2xl max-w-3xl w-full relative">
+            <h2 class="text-2xl md:text-3xl font-semibold main-text mb-6">Câu 1: Dế Mèn có ngoại hình được miêu tả như thế nào ở đầu truyện?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                <button onclick="showFeedback(false, 2, 'A. Gầy gò, ốm yếu, nhìn như gã nghiện thuốc phiện')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">A. Gầy gò, ốm yếu, nhìn như gã nghiện thuốc phiện</button>
+                <button onclick="showFeedback(true, 3)" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">B. Cường tráng, khỏe mạnh với đôi càng mẫm bóng</button>
+                <button onclick="showFeedback(false, 2, 'C. Nhỏ bé, yếu ớt, luôn sợ sệt')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">C. Nhỏ bé, yếu ớt, luôn sợ sệt</button>
+                <button onclick="showFeedback(false, 2, 'D. Lùn một mẩu, bụng phệ')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">D. Lùn một mẩu, bụng phệ</button>
+            </div>
+            <svg onclick="handleTTS(this.previousElementSibling.previousElementSibling.textContent)" class="tts-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+        </div>
+    </div>
+    
+    <div id="slide-3" class="slide question-slide" data-question="Tính cách của Dế Mèn ở đầu truyện là gì?" data-correct="B. Tự cao, kiêu ngạo, hay cà khịa với mọi người">
+        <div class="bg-white/10 p-8 rounded-2xl shadow-2xl max-w-3xl w-full relative">
+            <h2 class="text-2xl md:text-3xl font-semibold main-text mb-6">Câu 2: Tính cách của Dế Mèn ở đầu truyện là gì?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                <button onclick="showFeedback(false, 3, 'A. Khiêm tốn, tốt bụng, hay giúp đỡ kẻ yếu')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">A. Khiêm tốn, tốt bụng, hay giúp đỡ kẻ yếu</button>
+                <button onclick="showFeedback(true, 4)" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">B. Tự cao, kiêu ngạo, hay cà khịa với mọi người</button>
+                <button onclick="showFeedback(false, 3, 'C. Nhút nhát, rụt rè, ít nói')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">C. Nhút nhát, rụt rè, ít nói</button>
+                <button onclick="showFeedback(false, 3, 'D. Hiền lành, chăm chỉ làm ăn')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">D. Hiền lành, chăm chỉ làm ăn</button>
+            </div>
+            <svg onclick="handleTTS(this.previousElementSibling.previousElementSibling.textContent)" class="tts-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+        </div>
+    </div>
+
+    <div id="slide-4" class="slide question-slide" data-question="Hành động nào của Dế Mèn đã gây ra cái chết thương tâm cho Dế Choắt?" data-correct="B. Trêu chọc chị Cốc rồi chui vào hang khiến Dế Choắt bị vạ lây">
+        <div class="bg-white/10 p-8 rounded-2xl shadow-2xl max-w-3xl w-full relative">
+            <h2 class="text-2xl md:text-3xl font-semibold main-text mb-6">Câu 3: Hành động nào của Dế Mèn đã gây ra cái chết thương tâm cho Dế Choắt?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                <button onclick="showFeedback(false, 4, 'A. Rủ Dế Choắt đi đào hang ở chỗ nguy hiểm')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">A. Rủ Dế Choắt đi đào hang ở chỗ nguy hiểm</button>
+                <button onclick="showFeedback(true, 5)" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">B. Trêu chọc chị Cốc rồi chui vào hang khiến Dế Choắt bị vạ lây</button>
+                <button onclick="showFeedback(false, 4, 'C. Không cho Dế Choắt thức ăn khi đói')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">C. Không cho Dế Choắt thức ăn khi đói</button>
+                <button onclick="showFeedback(false, 4, 'D. Đánh nhau với Dế Choắt')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">D. Đánh nhau với Dế Choắt</button>
+            </div>
+            <svg onclick="handleTTS(this.previousElementSibling.previousElementSibling.textContent)" class="tts-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+        </div>
+    </div>
+    
+    <div id="slide-5" class="slide question-slide" data-question="Trước khi chết, Dế Choắt đã khuyên Dế Mèn điều gì?" data-correct="B. Ở đời mà có thói hung hăng bậy bạ... sớm muộn rồi cũng mang vạ vào mình đấy.">
+        <div class="bg-white/10 p-8 rounded-2xl shadow-2xl max-w-3xl w-full relative">
+            <h2 class="text-2xl md:text-3xl font-semibold main-text mb-6">Câu 4: Trước khi chết, Dế Choắt đã khuyên Dế Mèn điều gì?</h2>
+            <div class="grid grid-cols-1 gap-4 w-full">
+                <button onclick="showFeedback(false, 5, 'A. Hãy đi phiêu lưu khắp nơi để mở mang tầm mắt.')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">A. "Hãy đi phiêu lưu khắp nơi để mở mang tầm mắt."</button>
+                <button onclick="showFeedback(true, 6)" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">B. "Ở đời mà có thói hung hăng bậy bạ... sớm muộn rồi cũng mang vạ vào mình đấy."</button>
+                <button onclick="showFeedback(false, 5, 'C. Hãy chăm chỉ làm việc và đừng bao giờ lười biếng.')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">C. "Hãy chăm chỉ làm việc và đừng bao giờ lười biếng."</button>
+            </div>
+            <svg onclick="handleTTS(this.previousElementSibling.previousElementSibling.textContent)" class="tts-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+        </div>
+    </div>
+
+    <div id="slide-6" class="slide question-slide" data-question="Tác giả của truyện 'Bài học đường đời đầu tiên' là ai?" data-correct="B. Tô Hoài">
+        <div class="bg-white/10 p-8 rounded-2xl shadow-2xl max-w-3xl w-full relative">
+            <h2 class="text-2xl md:text-3xl font-semibold main-text mb-6">Câu 5: Tác giả của truyện "Bài học đường đời đầu tiên" là ai?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                 <button onclick="showFeedback(false, 6, 'A. Nguyễn Nhật Ánh')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">A. Nguyễn Nhật Ánh</button>
+                 <button onclick="showFeedback(true, 14)" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">B. Tô Hoài</button>
+                 <button onclick="showFeedback(false, 6, 'C. Trần Đăng Khoa')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">C. Trần Đăng Khoa</button>
+                 <button onclick="showFeedback(false, 6, 'D. Nam Cao')" class="accent-bg accent-text p-4 rounded-lg font-semibold text-lg btn-option">D. Nam Cao</button>
+            </div>
+            <svg onclick="handleTTS(this.previousElementSibling.previousElementSibling.textContent)" class="tts-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+        </div>
+    </div>
+
+    <!-- Slide 12: Phản hồi Đúng -->
+    <div id="slide-12" class="slide">
+        <div class="bg-green-500 p-8 rounded-2xl shadow-2xl max-w-md w-full text-white relative">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Chúc mừng!</h2>
+            <p class="text-xl mb-4">Bạn đã trả lời đúng rồi!</p>
+            <img src="https://i.imgur.com/x4y2A4V.png" alt="Dế Mèn reo hò" class="character-img mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/300x250/22c55e/ffffff?text=Tuy%E1%BB%87t+v%E1%BB%9Di!';">
+            <button id="next-q-btn" class="bg-white text-green-600 font-bold py-3 px-8 rounded-full text-xl btn-option">Câu tiếp theo</button>
+            <svg onclick="handleTTS(this.previousElementSibling.previousElementSibling.textContent)" class="tts-icon" style="fill: white;" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+        </div>
+    </div>
+
+    <!-- Slide 13: Phản hồi Sai -->
+    <div id="slide-13" class="slide">
+        <div class="bg-red-500 p-8 rounded-2xl shadow-2xl max-w-md w-full text-white relative">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Ôi, sai mất rồi!</h2>
+            <p class="text-xl mb-6">Suy nghĩ lại và thử lại nhé.</p>
+            <img src="https://i.imgur.com/KqWkL7S.png" alt="Dế Mèn buồn bã" class="character-img mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/300x250/ef4444/ffffff?text=Ti%E1%BA%BFc+qu%C3%A1!';">
+            <div class="flex space-x-4">
+                <button id="retry-btn" class="bg-white text-red-600 font-bold py-3 px-6 rounded-full text-lg btn-option">Thử lại</button>
+                <button id="explain-btn" onclick="handleExplanation()" class="bg-yellow-400 text-red-800 font-bold py-3 px-6 rounded-full text-lg btn-option">✨ Giải thích giúp tớ</button>
+            </div>
+            <svg onclick="handleTTS(this.previousElementSibling.previousElementSibling.textContent)" class="tts-icon" style="fill: white;" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+        </div>
+    </div>
+
+    <!-- Slide 14: Tổng kết -->
+    <div id="slide-14" class="slide">
+        <div class="bg-white/10 p-8 rounded-2xl shadow-2xl max-w-3xl w-full relative">
+            <h1 class="text-4xl md:text-5xl font-bold main-text mb-4">Hoan hô!</h1>
+            <p class="text-white text-lg md:text-xl mb-6">Bạn đã hoàn thành xuất sắc bài học cùng Dế Mèn. Hãy luôn nhớ bài học quý giá về tính kiêu căng và những trò đùa dại dột nhé!</p>
+            <img src="https://i.imgur.com/dJ8B9pC.png" alt="Dế Mèn trưởng thành" class="character-img mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/300x250/003366/FFD700?text=Ho%C3%A0n+th%C3%A0nh!';">
+            <button onclick="showSlide(1)" class="accent-bg accent-text font-bold py-3 px-8 rounded-full text-xl btn-option">Chơi lại</button>
+            <svg onclick="handleTTS(this.previousElementSibling.previousElementSibling.textContent)" class="tts-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+        </div>
+    </div>
+
+    <!-- Slide 15: Giải thích AI -->
+    <div id="slide-15" class="slide">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-2xl w-full text-left accent-text">
+            <h2 class="text-2xl md:text-3xl font-bold mb-4 text-center main-text" style="color: #003366;">✨ Dế Mèn giải thích</h2>
+            <div id="explanation-content" class="text-lg space-y-3">
+                <div class="flex justify-center items-center h-32">
+                    <div class="loader"></div>
+                </div>
+            </div>
+            <div class="text-center mt-6">
+                 <button id="back-to-q-btn" class="accent-bg accent-text font-bold py-3 px-8 rounded-full text-xl btn-option">Tớ hiểu rồi!</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        let currentSlide = 1;
+        let previousQuestionSlide = 1;
+        let lastIncorrectAnswer = {
+            question: '',
+            wrongAnswer: '',
+            correctAnswer: ''
+        };
+        let audioContext;
+        let currentAudioSource = null;
+
+        // --- Gemini API Configuration ---
+        const apiKey = ""; // Leave this empty, it will be handled by the environment.
+        const textGenerationUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+        // --- Core Slide Logic ---
+        function showSlide(slideNumber) {
+            document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+            const activeSlide = document.getElementById(`slide-${slideNumber}`);
+            if (activeSlide) {
+                activeSlide.classList.add('active');
+                currentSlide = slideNumber;
+            }
+        }
+
+        function showFeedback(isCorrect, nextQuestion, wrongAnswerText = '') {
+            previousQuestionSlide = currentSlide;
+            const questionSlide = document.getElementById(`slide-${previousQuestionSlide}`);
+            
+            if (isCorrect) {
+                showSlide(12);
+                document.getElementById('next-q-btn').onclick = () => showSlide(nextQuestion);
+            } else {
+                lastIncorrectAnswer = {
+                    question: questionSlide.dataset.question,
+                    wrongAnswer: wrongAnswerText,
+                    correctAnswer: questionSlide.dataset.correct
+                };
+                showSlide(13);
+                document.getElementById('retry-btn').onclick = () => showSlide(previousQuestionSlide);
+            }
+        }
+        
+        // --- Gemini Text Generation Feature ---
+        async function handleExplanation() {
+            showSlide(15);
+            const explanationContent = document.getElementById('explanation-content');
+            explanationContent.innerHTML = `<div class="flex justify-center items-center h-32"><div class="loader"></div></div>`;
+            document.getElementById('back-to-q-btn').onclick = () => showSlide(previousQuestionSlide);
+
+            const prompt = `Với tư cách là Dế Mèn thông thái, hãy giải thích cho một bạn học sinh lớp 6 tại sao câu trả lời của bạn ấy lại sai. Giọng văn thật thân thiện, đơn giản và khích lệ nhé.
+            - Bối cảnh: Trắc nghiệm truyện "Bài học đường đời đầu tiên".
+            - Câu hỏi: "${lastIncorrectAnswer.question}"
+            - Bạn ấy đã chọn (sai): "${lastIncorrectAnswer.wrongAnswer}"
+            - Đáp án đúng là: "${lastIncorrectAnswer.correctAnswer}"
+            Hãy giải thích ngắn gọn tại sao đáp án đã chọn là sai và tại sao đáp án đúng lại chính xác, dựa vào nội dung câu chuyện.`;
+
+            try {
+                const payload = { contents: [{ parts: [{ text: prompt }] }] };
+                const response = await fetch(textGenerationUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                const text = result.candidates[0].content.parts[0].text;
+                explanationContent.innerHTML = text.replace(/\n/g, '<br>');
+
+            } catch (error) {
+                console.error("Error fetching Gemini explanation:", error);
+                explanationContent.innerHTML = "<p>Rất tiếc, Dế Mèn đang bận một chút. Bạn thử lại sau nhé!</p>";
+            }
+        }
+
+        // --- Gemini TTS Feature ---
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcmData, sampleRate) {
+            const numChannels = 1;
+            const bitsPerSample = 16;
+            const blockAlign = (numChannels * bitsPerSample) / 8;
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = pcmData.length * 2;
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            function writeString(view, offset, string) {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            }
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitsPerSample, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            const pcm16 = new Int16Array(pcmData.buffer);
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(44 + i * 2, pcm16[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+
+        async function handleTTS(textToSpeak) {
+            if (currentAudioSource) {
+                currentAudioSource.stop();
+                currentAudioSource = null;
+            }
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.error("Web Audio API is not supported in this browser");
+                    return;
+                }
+            }
+            
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text: textToSpeak }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Vindemiatrix" } }
+                        }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+
+                const response = await fetch(ttsUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`TTS API Error: ${response.status}`);
+                
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+
+                } else {
+                    throw new Error("Invalid audio data in response.");
+                }
+
+            } catch (error) {
+                console.error("Error with TTS feature:", error);
+            }
+        }
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+             showSlide(1);
+        });
+    </script>
+</body>
+</html>
