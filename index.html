@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game: Dế Mèn và Bài học đường đời</title>
+    <style>
+        /* --- Cài đặt font chữ và giao diện tổng thể --- */
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #a8e6cf, #dcedc1);
+            color: #3a3a3a;
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #game-container {
+            background-color: #ffffff;
+            padding: 25px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            width: 95%;
+            border: 3px solid #fff;
+        }
+
+        /* --- Tiêu đề và văn bản --- */
+        h1 {
+            color: #2c6e49;
+            font-size: 2.4em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: #4c956c;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f7b733;
+            padding-bottom: 10px;
+        }
+        
+        p {
+            font-size: 1.15em;
+            line-height: 1.7;
+            font-weight: 500;
+        }
+
+        /* --- Các màn hình của game --- */
+        .screen {
+            display: none;
+        }
+
+        #start-screen, #end-screen {
+            display: block;
+        }
+        
+        #start-screen img, #end-screen img {
+            max-width: 220px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* --- Nút bấm --- */
+        button {
+            background: linear-gradient(45deg, #f7b733, #fc4a1a);
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.2em;
+            font-weight: 700;
+            font-family: 'Quicksand', sans-serif;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            box-shadow: 0 4px 15px rgba(252, 74, 26, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(252, 74, 26, 0.5);
+        }
+
+        /* --- Màn 1: Trắc nghiệm --- */
+        .question-container {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        .question-container p {
+            font-size: 1.25em;
+        }
+
+        .options button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            background: linear-gradient(145deg, #4CAF50, #66bb6a);
+            text-align: left;
+            padding: 15px 20px;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .options button.correct { 
+            background: linear-gradient(145deg, #2c6e49, #4c956c);
+            box-shadow: 0 4px 15px rgba(44, 110, 73, 0.4);
+        }
+        .options button.incorrect { 
+            background: linear-gradient(145deg, #e53935, #f44336);
+            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.4);
+        }
+        .options button:disabled { 
+            cursor: not-allowed; 
+            opacity: 0.7;
+        }
+        .options button:not(:disabled):hover { 
+            transform: translateX(5px);
+        }
+
+        /* --- Màn 2: Nối ghép --- */
+        #matching-game {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .column {
+            flex-basis: 100%;
+            margin-bottom: 10px;
+        }
+        
+        @media (min-width: 600px) {
+            .column {
+                flex-basis: 48%;
+            }
+        }
+        
+        .match-item {
+            background-color: #e8f5e9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 12px;
+            cursor: grab;
+            border: 2px dashed #a5d6a7;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .match-item:hover {
+            transform: scale(1.03);
+            border-color: #66bb6a;
+        }
+        
+        .match-item.selected {
+            border-color: #fc4a1a;
+            border-style: solid;
+            background-color: #fff3e0;
+            transform: scale(1.05);
+        }
+
+        /* --- Màn 3: Đoán nhân vật --- */
+        #character-description {
+            background-color: #fffde7;
+            border-left: 6px solid #fdd835;
+            padding: 20px;
+            margin: 25px auto;
+            font-style: italic;
+            width: 90%;
+            border-radius: 0 8px 8px 0;
+            font-size: 1.2em;
+        }
+        
+        #guess-character-container button {
+             background: linear-gradient(45deg, #2196F3, #42A5F5);
+             box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        }
+        
+        #guess-character-container button:hover {
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
+        }
+
+
+        /* --- Hiển thị điểm và phản hồi --- */
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            min-height: 30px;
+        }
+        
+        #score-display {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #fff;
+            background-color: rgba(44, 110, 73, 0.8);
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <div id="score-display">Điểm: 0</div>
+
+        <!-- Màn hình bắt đầu -->
+        <div id="start-screen" class="screen">
+            <h1>Dế Mèn và Bài học đường đời</h1>
+            <img src="https://placehold.co/400x250/a8e6cf/2c6e49?text=D%E1%BA%BF+M%C3%A8n" alt="Hình ảnh Dế Mèn">
+            <p>Chào mừng bạn đến với thế giới của Dế Mèn! Hãy cùng khám phá những cuộc phiêu lưu và rút ra những bài học quý giá qua các thử thách sau đây nhé.</p>
+            <button onclick="startGame()">Bắt đầu!</button>
+        </div>
+
+        <!-- Màn 1: Trắc nghiệm -->
+        <div id="screen-1" class="screen">
+            <h2>Màn 1: Thử tài trắc nghiệm</h2>
+            <div id="quiz-container">
+                <!-- Câu hỏi sẽ được chèn vào đây bởi JavaScript -->
+            </div>
+            <div id="feedback-1" class="feedback-text"></div>
+        </div>
+
+        <!-- Màn 2: Nối ghép -->
+        <div id="screen-2" class="screen">
+            <h2>Màn 2: Hành trình trưởng thành</h2>
+            <p>Hãy nối hành động của Dế Mèn (cột trái) với kết quả hoặc bài học tương ứng (cột phải) bằng cách nhấp chuột vào chúng.</p>
+            <div id="matching-game">
+                <div id="actions-column" class="column"></div>
+                <div id="lessons-column" class="column"></div>
+            </div>
+            <div id="feedback-2" class="feedback-text"></div>
+            <button onclick="nextStage()" style="display: none;" id="btn-next-stage-2">Tiếp tục</button>
+        </div>
+
+        <!-- Màn 3: Đoán nhân vật -->
+        <div id="screen-3" class="screen">
+            <h2>Màn 3: Tôi là ai?</h2>
+            <p>Đọc mô tả dưới đây và đoán xem đó là Dế Mèn hay Dế Choắt.</p>
+            <div id="guess-character-container">
+                 <!-- Nội dung sẽ được chèn vào đây -->
+            </div>
+            <div id="feedback-3" class="feedback-text"></div>
+        </div>
+        
+        <!-- Màn hình kết thúc -->
+        <div id="end-screen" class="screen">
+            <h2>Chúc mừng bạn đã hoàn thành!</h2>
+             <img src="https://placehold.co/400x250/dcedc1/4c956c?text=B%C3%A0i+h%E1%BB%8Dc+%C4%91%C6%B0%E1%BB%9Dng+%C4%91%E1%BB%9Di" alt="Dế Mèn và Dế Choắt">
+            <p>Bạn đã xuất sắc vượt qua các thử thách và hiểu sâu hơn về câu chuyện "Bài học đường đời đầu tiên".</p>
+            <p id="final-score" style="font-size: 1.5em; color: #2c6e49; font-weight: 700;"></p>
+            <button onclick="restartGame()">Chơi lại</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DỮ LIỆU TRÒ CHƠI ---
+        const quizQuestions = [
+            {
+                question: "Chi tiết nào miêu tả vẻ đẹp cường tráng của Dế Mèn?",
+                options: [
+                    "Đôi càng tôi mẫm bóng.",
+                    "Người gầy gò, dài lêu nghêu như một gã nghiện.",
+                    "Cánh ngắn củn đến giữa lưng.",
+                    "Râu ria cụt có một mẩu."
+                ],
+                answer: "Đôi càng tôi mẫm bóng."
+            },
+            {
+                question: "Thái độ của Dế Mèn đối với Dế Choắt lúc ban đầu như thế nào?",
+                options: [
+                    "Thương cảm, giúp đỡ.",
+                    "Khiêm tốn, học hỏi.",
+                    "Kiêu căng, xem thường.",
+                    "Sợ hãi, xa lánh."
+                ],
+                answer: "Kiêu căng, xem thường."
+            },
+            {
+                question: "Nguyên nhân trực tiếp dẫn đến cái chết của Dế Choắt là gì?",
+                options: [
+                    "Do Dế Mèn không đào hang giúp.",
+                    "Do bị chị Cốc mổ nhầm sau trò trêu chọc của Dế Mèn.",
+                    "Do bị ốm yếu lâu ngày.",
+                    "Do bị các loài vật khác bắt nạt."
+                ],
+                answer: "Do bị chị Cốc mổ nhầm sau trò trêu chọc của Dế Mèn."
+            },
+            {
+                question: "Trước khi chết, Dế Choắt đã khuyên Dế Mèn điều gì?",
+                options: [
+                    "Hãy chăm chỉ làm việc hơn.",
+                    "Ở đời mà có thói hung hăng bậy bạ, có óc mà không biết nghĩ, sớm muộn rồi cũng mang vạ vào mình đấy.",
+                    "Nên đi phiêu lưu ở những vùng đất xa xôi.",
+                    "Phải trả thù cho mình."
+                ],
+                answer: "Ở đời mà có thói hung hăng bậy bạ, có óc mà không biết nghĩ, sớm muộn rồi cũng mang vạ vào mình đấy."
+            },
+            {
+                question: "Nghệ thuật đặc sắc nào được sử dụng để miêu tả nhân vật Dế Mèn?",
+                options: [
+                    "Sử dụng ngôi kể thứ nhất, giúp nhân vật tự bộc lộ tính cách.",
+                    "Sử dụng nhiều tính từ, động từ mạnh và hình ảnh so sánh độc đáo.",
+                    "Miêu tả ngoại hình gắn liền với tính cách nhân vật.",
+                    "Tất cả các đáp án trên."
+                ],
+                answer: "Tất cả các đáp án trên."
+            }
+        ];
+
+        const matchingPairs = {
+            "Tự cho mình là \"tay ghê gớm, có thể đứng đầu thiên hạ\"": "Tính cách kiêu căng, tự phụ.",
+            "Trêu chọc chị Cốc rồi chui tọt vào hang": "Hành động ngông cuồng, không lường trước hậu quả.",
+            "Gây ra cái chết oan uổng cho Dế Choắt": "Sự ân hận và bài học xương máu đầu tiên.",
+            "Đứng lặng giờ lâu bên nấm mồ của bạn": "Sự thức tỉnh và hối hận muộn màng."
+        };
+
+        const guessCharacters = [
+            {
+                description: "Thanh niên cường tráng, đôi càng mẫm bóng, sợi râu dài và uốn cong một vẻ rất đỗi hùng dũng.",
+                answer: "Dế Mèn"
+            },
+            {
+                description: "Người gầy gò, ốm yếu, cánh ngắn củn, tính tình nhút nhát nhưng giàu lòng vị tha.",
+                answer: "Dế Choắt"
+            },
+            {
+                description: "Kiêu căng, hống hách, hay bắt nạt kẻ yếu nhưng sau đó đã biết ân hận, sửa đổi.",
+                answer: "Dế Mèn"
+            }
+        ];
+        
+        // --- BIẾN TRẠNG THÁI TRÒ CHƠI ---
+        let currentStage = 0;
+        let score = 0;
+        let currentQuestionIndex = 0;
+        let currentCharacterIndex = 0;
+        
+        // --- CÁC THÀNH PHẦN DOM ---
+        const screens = document.querySelectorAll('.screen');
+        const scoreDisplay = document.getElementById('score-display');
+        
+        // --- CÁC HÀM CHỨC NĂNG CHÍNH ---
+        function showScreen(id) {
+            screens.forEach(screen => screen.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function updateScore(points) {
+            score += points;
+            scoreDisplay.textContent = `Điểm: ${score}`;
+        }
+        
+        function startGame() {
+            currentStage = 1;
+            score = 0;
+            currentQuestionIndex = 0;
+            updateScore(0);
+            showScreen('screen-1');
+            loadQuizQuestion();
+        }
+
+        function restartGame() {
+            currentStage = 0;
+            score = 0;
+            currentQuestionIndex = 0;
+            currentCharacterIndex = 0;
+            document.getElementById('final-score').textContent = '';
+            showScreen('start-screen');
+        }
+
+        // --- MÀN 1: TRẮC NGHIỆM ---
+        function loadQuizQuestion() {
+            const quizContainer = document.getElementById('quiz-container');
+            const feedback = document.getElementById('feedback-1');
+            feedback.textContent = '';
+            
+            if (currentQuestionIndex < quizQuestions.length) {
+                const q = quizQuestions[currentQuestionIndex];
+                let optionsHTML = q.options.map(option => 
+                    `<button onclick="checkAnswer(this, '${option.replace(/'/g, "\\'")}')">${option}</button>`
+                ).join('');
+
+                quizContainer.innerHTML = `
+                    <div class="question-container">
+                        <p><strong>Câu ${currentQuestionIndex + 1}:</strong> ${q.question}</p>
+                        <div class="options">${optionsHTML}</div>
+                    </div>
+                `;
+            } else {
+                // Kết thúc màn 1, chuyển sang màn 2
+                setTimeout(() => {
+                    nextStage();
+                }, 1500);
+            }
+        }
+
+        function checkAnswer(button, selectedOption) {
+            const q = quizQuestions[currentQuestionIndex];
+            const feedback = document.getElementById('feedback-1');
+            const options = button.parentElement.children;
+
+            for (let opt of options) {
+                opt.disabled = true;
+            }
+
+            if (selectedOption === q.answer) {
+                button.classList.add('correct');
+                feedback.textContent = "Chính xác! Bạn thật giỏi!";
+                feedback.style.color = '#2c6e49';
+                updateScore(10);
+            } else {
+                button.classList.add('incorrect');
+                feedback.textContent = `Sai rồi! Đáp án đúng là: "${q.answer}"`;
+                feedback.style.color = '#e53935';
+                 // Đánh dấu đáp án đúng
+                for (let opt of options) {
+                    if(opt.textContent === q.answer) {
+                        opt.classList.add('correct');
+                    }
+                }
+            }
+
+            currentQuestionIndex++;
+            setTimeout(loadQuizQuestion, 2500);
+        }
+
+        // --- MÀN 2: NỐI GHÉP ---
+        let selectedAction = null;
+        let selectedLesson = null;
+        let matchedPairs = 0;
+
+        function setupMatchingGame() {
+            const actionsColumn = document.getElementById('actions-column');
+            const lessonsColumn = document.getElementById('lessons-column');
+            const feedback = document.getElementById('feedback-2');
+            
+            actionsColumn.innerHTML = '';
+            lessonsColumn.innerHTML = '';
+            feedback.textContent = '';
+            matchedPairs = 0;
+            document.getElementById('btn-next-stage-2').style.display = 'none';
+
+            const actions = Object.keys(matchingPairs);
+            const lessons = Object.values(matchingPairs);
+            
+            // Xáo trộn để tăng độ khó
+            actions.sort(() => Math.random() - 0.5);
+            lessons.sort(() => Math.random() - 0.5);
+
+            actions.forEach(action => {
+                const div = document.createElement('div');
+                div.className = 'match-item';
+                div.textContent = action;
+                div.dataset.value = action;
+                div.onclick = () => selectItem(div, 'action');
+                actionsColumn.appendChild(div);
+            });
+
+            lessons.forEach(lesson => {
+                const div = document.createElement('div');
+                div.className = 'match-item';
+                div.textContent = lesson;
+                div.dataset.value = lesson;
+                div.onclick = () => selectItem(div, 'lesson');
+                lessonsColumn.appendChild(div);
+            });
+        }
+
+        function selectItem(element, type) {
+            const feedback = document.getElementById('feedback-2');
+            feedback.textContent = '';
+
+            if (type === 'action') {
+                if (selectedAction) selectedAction.classList.remove('selected');
+                selectedAction = element;
+                element.classList.add('selected');
+            } else if (type === 'lesson') {
+                if (selectedLesson) selectedLesson.classList.remove('selected');
+                selectedLesson = element;
+                element.classList.add('selected');
+            }
+
+            if (selectedAction && selectedLesson) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const actionText = selectedAction.dataset.value;
+            const lessonText = selectedLesson.dataset.value;
+            const feedback = document.getElementById('feedback-2');
+
+            if (matchingPairs[actionText] === lessonText) {
+                feedback.textContent = "Chính xác! Một cặp ghép đúng.";
+                feedback.style.color = '#2c6e49';
+                updateScore(15);
+                
+                selectedAction.style.backgroundColor = '#c8e6c9';
+                selectedLesson.style.backgroundColor = '#c8e6c9';
+                selectedAction.style.cursor = 'not-allowed';
+                selectedLesson.style.cursor = 'not-allowed';
+                selectedAction.style.borderColor = 'transparent';
+                selectedLesson.style.borderColor = 'transparent';
+                selectedAction.onclick = null;
+                selectedLesson.onclick = null;
+
+                matchedPairs++;
+            } else {
+                feedback.textContent = "Chưa đúng, hãy thử lại!";
+                feedback.style.color = '#e53935';
+            }
+
+            selectedAction.classList.remove('selected');
+            selectedLesson.classList.remove('selected');
+            selectedAction = null;
+            selectedLesson = null;
+            
+            if (matchedPairs === Object.keys(matchingPairs).length) {
+                feedback.textContent = "Tuyệt vời! Bạn đã hoàn thành màn này.";
+                document.getElementById('btn-next-stage-2').style.display = 'inline-block';
+            }
+        }
+
+
+        // --- MÀN 3: ĐOÁN NHÂN VẬT ---
+        function loadGuessCharacter() {
+            const container = document.getElementById('guess-character-container');
+            const feedback = document.getElementById('feedback-3');
+            feedback.textContent = '';
+            
+            if (currentCharacterIndex < guessCharacters.length) {
+                const char = guessCharacters[currentCharacterIndex];
+                container.innerHTML = `
+                    <div id="character-description">${char.description}</div>
+                    <button onclick="checkCharacter('Dế Mèn')">Dế Mèn</button>
+                    <button onclick="checkCharacter('Dế Choắt')">Dế Choắt</button>
+                `;
+            } else {
+                 setTimeout(() => {
+                    nextStage();
+                }, 1500);
+            }
+        }
+
+        function checkCharacter(guess) {
+            const char = guessCharacters[currentCharacterIndex];
+            const feedback = document.getElementById('feedback-3');
+            const buttons = document.getElementById('guess-character-container').querySelectorAll('button');
+
+            buttons.forEach(b => b.disabled = true);
+            
+            if (guess === char.answer) {
+                feedback.textContent = "Đúng rồi! Bạn rất hiểu các nhân vật.";
+                feedback.style.color = '#2c6e49';
+                updateScore(10);
+            } else {
+                feedback.textContent = `Sai rồi! Đây là ${char.answer}.`;
+                feedback.style.color = '#e53935';
+            }
+
+            currentCharacterIndex++;
+            setTimeout(loadGuessCharacter, 2500);
+        }
+
+        // --- CHUYỂN MÀN ---
+        function nextStage() {
+            currentStage++;
+            if (currentStage === 2) {
+                showScreen('screen-2');
+                setupMatchingGame();
+            } else if (currentStage === 3) {
+                showScreen('screen-3');
+                loadGuessCharacter();
+            } else if (currentStage === 4) {
+                showScreen('end-screen');
+                document.getElementById('final-score').textContent = `Tổng điểm của bạn là: ${score}`;
+            }
+        }
+
+        // --- KHỞI ĐỘNG KHI TẢI TRANG ---
+        window.onload = () => {
+             showScreen('start-screen');
+        };
+
+    </script>
+
+</body>
+</html>
